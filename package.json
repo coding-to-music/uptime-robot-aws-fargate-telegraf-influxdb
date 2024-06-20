@@ -1,0 +1,13 @@
+{
+  "name": "uptime-robot-aws-fargate-telegraf-influxdb",
+  "version": "1.0.0",
+  "description": "# 🚀 Use Telegraf to scrape uptimeRobot and serverless AWS container Fargate and write into InfluxDB cloud 🚀",
+  "main": "index.js",
+  "scripts": {
+    "deploy": "git add . && git commit -m Build && git push",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

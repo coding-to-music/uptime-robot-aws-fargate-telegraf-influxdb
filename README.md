@@ -36,6 +36,8 @@ git push -u origin main
 
 ```
 
+#### Example Influx Notebook showing availability and up/down status:
+
 ![image](/images/availability_view_1.png)
 
 ## Building a serverless site availability monitoring platform with Telegraf, AWS Fargate and InfluxCloud
