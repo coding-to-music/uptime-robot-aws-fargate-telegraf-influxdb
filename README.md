@@ -44,11 +44,11 @@ git push -u origin main
 
 By Ben Tasker 2022-05-28 14:00
 
-I use a free Uptime Robot account to help keep an eye on the availability of www.bentasker.co.uk.
+I use a free [Uptime Robot](https://uptimerobot.com/) account to help keep an eye on the availability of www.bentasker.co.uk.
 
-Every 5 minutes, UptimeRobot places requests to my site (and it's origin) and reports on how long those requests take to complete and updates my status page if there are issues.
+Every 5 minutes, UptimeRobot places requests to my site (and it's origin) and reports on how long those requests take to complete and updates my [status page](https://stats.uptimerobot.com/r7L56IAvO5) if there are issues.
 
-The free tier only tests from a single location, but is usually a good indicator of when things are going (or starting to go) wrong. I use my uptime-robot exec plugin for Telegraf to pull stats from UptimeRobot into InfluxDB for use in dashboards.
+The free tier only tests from a single location, but is usually a good indicator of when things are going (or starting to go) wrong. I use my [uptime-robot exec plugin](https://github.com/bentasker/telegraf-plugins/tree/master/uptime-robot) for Telegraf to pull stats from UptimeRobot into InfluxDB for use in dashboards.
 
 Because I test against my origin as well as the CDN, it's usually possible to tell (roughly) where an issue lies: if CDN response time increases, but origin doesn't, then the issue is likely on the CDN.
 
@@ -60,29 +60,29 @@ UptimeRobot reports increase in latency fetching from my site
 
 This suggests possible CDN issues, but the increase wasn't reflected in response time stats drawn from other sources:
 
-- There was no increase in the response time metrics recorded by my Privacy Friendly Analytics system
+- There was no increase in the response time metrics recorded by my [Privacy Friendly Analytics](https://www.bentasker.co.uk/posts/blog/software-development/designing-privacy-friendly-analytics.html) system
 - The Telegraf instance (checking the same endpoints) on my LAN wasn't reporting an increase
 
 Given that pfanalytics wasn't screaming at me and that I couldn't manually reproduce the issue, I felt reasonably confident that whatever this was, it wasn't impacting real users.
 
 But, I decided that it would be useful to have some other geographically distributed availability system that I could use for investigation and corroboration in future.
 
-I chose to use Amazon's Elastic Container Server (ECS) with AWS Fargate to build my solution.
+I chose to use [Amazon's Elastic Container Server (ECS)](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/Welcome.html) with [AWS Fargate](https://aws.amazon.com/fargate/) to build my solution.
 
-This post walks through the process of setting up a serverless solution which runs Telegraf in a Fargate cluster and writes availability data into a free InfluxDB Cloud account.
+This post walks through the process of setting up a serverless solution which runs [Telegraf](https://github.com/influxdata/telegraf) in a Fargate cluster and writes availability data into a free [InfluxDB Cloud](https://cloud2.influxdata.com/) account.
 
 ### Why Fargate?
 
-We could achieve the same aim by running Telegraf on some EC2 instances: setup would be absolutely trivial.
+We could achieve the same aim by running Telegraf on some [EC2 instances](https://aws.amazon.com/ec2/): setup would be absolutely trivial.
 
 However, Telegraf is only going to be polling periodically and the EC2 instances would be running (and being billed for) constantly.
 
-With Fargate we only pay for the time that a container uses (with a minimum billing period of 1 minute per invocation), so we should be able to reduce costs significantly by running Telegraf's docker image within Fargate.
+With Fargate we only pay for the time that a container uses (with a minimum billing period of 1 minute per invocation), so we should be able to reduce costs significantly by running [Telegraf's docker image](https://hub.docker.com/_/telegraf/) within Fargate.
 
 At time of writing, AWS's pricing in us-east-2 is
 
-- EC2 t3.micro charged at $0.0104/hr ($7.20 month)
-- Fargate: charged at $0.04048 per vcpu/hr + $0.004445 GB RAM/hr
+- [EC2](https://aws.amazon.com/ec2/pricing/) t3.micro charged at $0.0104/hr ($7.20 month)
+- [Fargate](https://aws.amazon.com/fargate/pricing/): charged at $0.04048 per vcpu/hr + $0.004445 GB RAM/hr
 
 (data transfer is extra, but is the same rate for each)
 
@@ -118,7 +118,7 @@ Our expected cost for Fargate is $0.002469/hr ($1.777/month), plus data charges.
 
 ### Telegraf Config Setup
 
-We're going to use quite a simple Telegraf configuration, relying entirely on Telegraf's http_response plugin.
+We're going to use quite a simple Telegraf configuration, relying entirely on Telegraf's [http_response](https://github.com/influxdata/telegraf/tree/master/plugins/inputs/http_response) plugin.
 
 The configuration for this is as simple as
 
@@ -209,7 +209,7 @@ Later, we'll use this as a guide to help us configure the container in AWS.
 
 Next, we need to do the AWS side setup. The process is actually quite simple.
 
-Log into console.aws.amazon.com and go to the Elastic Containers Service.
+Log into [console.aws.amazon.com](https://console.aws.amazon.com/) and go to the [Elastic Containers Service](https://eu-west-1.console.aws.amazon.com/ecs/home).
 
 Then, create a cluster using the Fargate type (tick to create a new VPC if you want to seperate this out from your other AWS infra)
 
@@ -243,7 +243,7 @@ We set the command to
 telegraf,--once,--config,https://eu-central-1-1.aws.cloud2.influxdata.com/api/v2/telegrafs/00fffaaaa1111
 ```
 
-Where the URL is the URL to our InfluxCloud hosted Telegraf configuration file. This is the command we designed in Telegraf Invocation with the command segments delimited by commas rather than spaces.
+Where the URL is the URL to our InfluxCloud hosted Telegraf configuration file. This is the command we designed in [Telegraf Invocation](https://www.bentasker.co.uk/posts/blog/general/website-availability-monitoring-with-telegraf-fargate-and-influxdb.html#telegraf-invocation) with the command segments delimited by commas rather than spaces.
 
 We then set a couple of environment variables
 
@@ -252,7 +252,7 @@ INFLUX_TOKEN: <token>
 TEST_REGION: eu-west
 ```
 
-These are the exports we used in Telegraf Invocation. Note: These can't be edited without deleting and recreating the container definition, but they can be overridden when the task is scheduled later.
+These are the exports we used in [Telegraf Invocation](https://www.bentasker.co.uk/posts/blog/general/website-availability-monitoring-with-telegraf-fargate-and-influxdb.html#telegraf-invocation). Note: These can't be edited without deleting and recreating the container definition, but they can be overridden when the task is scheduled later.
 
 Which should lead to the interface looking something like this
 
@@ -317,7 +317,7 @@ Creating Scheduled Task
 
 Click Create.
 
-Note: the task will also now show up as a rule in AWS Eventbridge.
+Note: the task will also now show up as a rule in [AWS Eventbridge](https://console.aws.amazon.com/events/home).
 
 In most regions, the task will trigger immediately (Singapore seems to be an exception - it waits until the next interval to run) and then will run at 5 minute intervals after that.
 
@@ -329,7 +329,7 @@ We can then follow the exact same process (changing only the value of our TEST_R
 
 Now that we're ingesting data, we need to visualise it.
 
-We're going to use an InfluxCloud Notebook because a Notebook has the option to be publicly shared, meaning that it could potentially be used as a service status page.
+We're going to use an [InfluxCloud Notebook](https://docs.influxdata.com/influxdb/cloud/notebooks/overview/) because a Notebook has the option to be publicly shared, meaning that it could potentially be used as a service status page.
 
 To calculate the current service status we take values from the last write by each probe (using last()).
 
@@ -485,7 +485,7 @@ The result is a serverless setup feeding into a page which can be shared publicl
 
 There are improvements that could be made on the setup I've built:
 
-- It'd probably be prudent to move the InfluxCloud token from an environment variable into AWS Secrets Manager
+- It'd probably be prudent to move the InfluxCloud token from an environment variable into [AWS Secrets Manager](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/specifying-sensitive-data.html)
 - An additional tag and environment variable could be added to note the provider the probe's running on: that way a multicloud setup could be used to probe from different cloud environments
 
 At some point, I might also create a variation of the notebook that can be sent to my CDN provider on trouble tickets.
