@@ -71,6 +71,27 @@ I chose to use [Amazon's Elastic Container Server (ECS)](https://docs.aws.amazon
 
 This post walks through the process of setting up a serverless solution which runs [Telegraf](https://github.com/influxdata/telegraf) in a Fargate cluster and writes availability data into a free [InfluxDB Cloud](https://cloud2.influxdata.com/) account.
 
+InfluxDB Cloud Free Tier has 30 day retention for the bucket data
+
+Free Plan has:
+
+- number of buckets: 2
+- 30 day data retention
+- writes: 5MB/5 mins
+- reads: 300MB/5 mins
+
+https://www.influxdata.com/influxdb-cloud-pricing/
+
+Usage-Based Plan has:
+
+- Unlimited data retention
+- Volume of data in: $0.0025/MB
+- Query count: $0.012 per 100 query executions
+- Storage (total disk usage): $0.002/GB-hour
+- Volume of data out: $0.09/GB
+- writes: 300MB/5 mins
+- reads: 3000MB/5 mins
+
 ### Why Fargate?
 
 We could achieve the same aim by running Telegraf on some [EC2 instances](https://aws.amazon.com/ec2/): setup would be absolutely trivial.
